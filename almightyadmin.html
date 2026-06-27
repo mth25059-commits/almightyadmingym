@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Almighty Gym — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#080808;color:#ececec;min-height:100vh}
+a{text-decoration:none;color:inherit}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#080808 0%,#161616 100%);padding:20px}
+.login-box{background:#161616;border:1px solid rgba(255,255,255,.08);border-top:3px solid #c0392b;border-radius:18px;padding:40px 36px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.login-logo{text-align:center;margin-bottom:28px}
+.login-logo span{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.1em;color:#fff}
+.login-logo p{font-size:.85rem;color:#a8a8a8;margin-top:4px}
+.login-box h2{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.05em;text-align:center;margin-bottom:24px;color:#ececec}
+.form-g{margin-bottom:16px}
+.form-g label{display:block;font-size:.8rem;font-weight:600;color:#a8a8a8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.form-g input{width:100%;padding:12px 16px;background:#1e1e1e;border:1px solid rgba(255,255,255,.07);border-radius:10px;color:#ececec;font-size:.9rem;outline:none;transition:all .3s}
+.form-g input:focus{border-color:rgba(192,57,43,.5);box-shadow:0 0 0 3px rgba(192,57,43,.12)}
+.btn-login{width:100%;padding:13px;background:linear-gradient(135deg,#e52d27,#8e1c10);color:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;margin-top:8px;transition:all .3s}
+.btn-login:hover{background:linear-gradient(135deg,#ff3e3e,#a93226);transform:translateY(-1px)}
+.login-err{display:none;background:rgba(192,57,43,.12);border:1px solid rgba(192,57,43,.3);border-radius:8px;padding:10px 14px;font-size:.85rem;color:#e74c3c;margin-bottom:14px;text-align:center}
+.login-hint{text-align:center;margin-top:14px;font-size:.78rem;color:#5c5c5c}
+.login-hint b{color:#a8a8a8}
+
+/* ADMIN LAYOUT */
+#adminApp{display:none;min-height:100vh;background:#080808}
+.admin-header{background:#0f0f0f;border-bottom:1px solid rgba(255,255,255,.07);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.admin-header-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.1em;color:#fff;display:flex;align-items:center;gap:8px}
+.admin-header-logo span{color:#c0392b}
+.admin-header-actions{display:flex;align-items:center;gap:10px}
+.btn-sm{padding:7px 16px;border-radius:8px;font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;border:none;transition:all .3s;display:inline-flex;align-items:center;gap:6px}
+.btn-site{background:rgba(192,57,43,.15);color:#c0392b;border:1px solid rgba(192,57,43,.3)}
+.btn-site:hover{background:rgba(192,57,43,.25)}
+.btn-logout{background:rgba(255,255,255,.06);color:#a8a8a8;border:1px solid rgba(255,255,255,.08)}
+.btn-logout:hover{background:rgba(255,255,255,.1);color:#fff}
+.admin-body{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px)}
+.admin-sidebar{background:#0f0f0f;border-right:1px solid rgba(255,255,255,.07);padding:20px 0}
+.sidebar-nav a{display:flex;align-items:center;gap:10px;padding:11px 22px;font-size:.86rem;font-weight:500;color:#a8a8a8;transition:all .3s;cursor:pointer;border-left:3px solid transparent}
+.sidebar-nav a:hover{color:#ececec;background:rgba(255,255,255,.04)}
+.sidebar-nav a.active{color:#c0392b;background:rgba(192,57,43,.08);border-left-color:#c0392b}
+.sidebar-nav a i{width:16px;text-align:center}
+.leads-badge{background:#c0392b;color:#fff;font-size:.7rem;font-weight:700;padding:1px 7px;border-radius:50px;margin-left:auto}
+.admin-content{padding:28px;overflow-y:auto}
+
+/* TAB PANELS */
+.panel{display:none}
+.panel.active{display:block}
+
+/* DASHBOARD CARDS */
+.stat-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:#161616;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;text-align:center}
+.stat-card .sc-n{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;color:#c0392b;line-height:1}
+.stat-card .sc-l{font-size:.78rem;color:#a8a8a8;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+
+/* LEADS TABLE */
+.leads-controls{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.search-input{padding:9px 14px;background:#161616;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:#ececec;font-size:.86rem;outline:none;width:240px;transition:all .3s}
+.search-input:focus{border-color:rgba(192,57,43,.4)}
+.btn-export{padding:9px 18px;background:rgba(201,168,76,.12);color:#c9a84c;border:1px solid rgba(201,168,76,.25);border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s}
+.btn-export:hover{background:rgba(201,168,76,.2)}
+.btn-clear{padding:9px 18px;background:rgba(192,57,43,.1);color:#c0392b;border:1px solid rgba(192,57,43,.2);border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s}
+.btn-clear:hover{background:rgba(192,57,43,.2)}
+.leads-table-wrap{overflow-x:auto;border-radius:12px;border:1px solid rgba(255,255,255,.07)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:#0f0f0f;padding:12px 16px;text-align:left;font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#5c5c5c;border-bottom:1px solid rgba(255,255,255,.07)}
+td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.05);color:#a8a8a8;vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{padding:3px 10px;border-radius:50px;font-size:.72rem;font-weight:600}
+.badge-basic{background:rgba(92,92,92,.2);color:#a8a8a8}
+.badge-pro{background:rgba(201,168,76,.15);color:#c9a84c}
+.badge-elite{background:rgba(192,57,43,.15);color:#c0392b}
+.badge-trial{background:rgba(34,197,94,.12);color:#22c55e}
+.no-leads{text-align:center;padding:48px;color:#5c5c5c}
+.no-leads i{font-size:2.5rem;margin-bottom:12px;display:block}
+
+/* SETTINGS SECTION */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.settings-card{background:#161616;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:24px}
+.settings-card h3{font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#c0392b;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.s-field{margin-bottom:14px}
+.s-field label{display:block;font-size:.78rem;font-weight:600;color:#a8a8a8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.s-field input,.s-field textarea{width:100%;padding:10px 14px;background:#1e1e1e;border:1px solid rgba(255,255,255,.07);border-radius:8px;color:#ececec;font-size:.88rem;outline:none;transition:all .3s;font-family:'Inter',sans-serif}
+.s-field input:focus,.s-field textarea:focus{border-color:rgba(192,57,43,.4);box-shadow:0 0 0 2px rgba(192,57,43,.1)}
+.s-field textarea{min-height:80px;resize:vertical}
+.btn-save{padding:11px 24px;background:linear-gradient(135deg,#c0392b,#8e1c10);color:#fff;border:none;border-radius:8px;font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .3s;margin-top:6px}
+.btn-save:hover{background:linear-gradient(135deg,#e52d27,#a93226);transform:translateY(-1px)}
+.save-msg{display:none;color:#22c55e;font-size:.82rem;margin-top:8px;align-items:center;gap:6px}
+
+/* PHOTO PREVIEW */
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.photo-item label{display:block;font-size:.75rem;font-weight:600;color:#a8a8a8;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.photo-item input{width:100%;padding:9px 12px;background:#1e1e1e;border:1px solid rgba(255,255,255,.07);border-radius:8px;color:#ececec;font-size:.82rem;outline:none;transition:all .3s;font-family:'Inter',sans-serif}
+.photo-item input:focus{border-color:rgba(192,57,43,.4)}
+.photo-preview{width:100%;height:80px;object-fit:cover;border-radius:6px;margin-top:6px;border:1px solid rgba(255,255,255,.06)}
+
+/* SECTION HEADING */
+.panel-head{margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.panel-head h2{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.05em;color:#ececec}
+.panel-head p{font-size:.86rem;color:#a8a8a8;margin-top:4px}
+
+/* PASSWORD CHANGE */
+.pw-card{background:#161616;border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:24px;max-width:420px}
+
+/* RESPONSIVE ADMIN */
+@media(max-width:900px){
+  .admin-body{grid-template-columns:1fr}
+  .admin-sidebar{display:none}
+  .stat-cards{grid-template-columns:repeat(2,1fr)}
+  .settings-grid{grid-template-columns:1fr}
+  .photo-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginWrap" class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo"><span>💪 ALMIGHTY</span><p>Admin Control Panel</p></div>
+    <div id="loginErr" class="login-err"><i class="fas fa-exclamation-circle"></i> Wrong username or password.</div>
+    <div class="form-g"><label>Username</label><input id="loginUser" type="text" placeholder="admin" autocomplete="off"></div>
+    <div class="form-g"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••"></div>
+    <button class="btn-login" onclick="doLogin()"><i class="fas fa-lock"></i> Login to Admin Panel</button>
+    <p class="login-hint">Default password: <b>almighty@123</b></p>
+  </div>
+</div>
+
+<!-- ADMIN APP -->
+<div id="adminApp">
+  <header class="admin-header">
+    <div class="admin-header-logo">💪 ALMIGHTY<span> GYM</span></div>
+    <div class="admin-header-actions">
+      <a href="index.html" target="_blank" class="btn-sm btn-site"><i class="fas fa-eye"></i> View Live Site</a>
+      <button class="btn-sm btn-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </header>
+  <div class="admin-body">
+    <nav class="admin-sidebar">
+      <div class="sidebar-nav">
+        <a class="active" onclick="switchPanel('dashboard',this)"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a onclick="switchPanel('leads',this)"><i class="fas fa-users"></i> Enquiries <span class="leads-badge" id="leadsCount">0</span></a>
+        <a onclick="switchPanel('photos',this)"><i class="fas fa-image"></i> Change Photos</a>
+        <a onclick="switchPanel('settings',this)"><i class="fas fa-cog"></i> Settings</a>
+        <a onclick="switchPanel('password',this)"><i class="fas fa-key"></i> Change Password</a>
+      </div>
+    </nav>
+    <main class="admin-content">
+
+      <!-- DASHBOARD -->
+      <div id="panel-dashboard" class="panel active">
+        <div class="panel-head"><div><h2>Dashboard</h2><p>Welcome back! Here's your gym overview.</p></div></div>
+        <div class="stat-cards">
+          <div class="stat-card"><div class="sc-n" id="totalLeads">0</div><div class="sc-l">Total Enquiries</div></div>
+          <div class="stat-card"><div class="sc-n" id="todayLeads">0</div><div class="sc-l">Today's Enquiries</div></div>
+          <div class="stat-card"><div class="sc-n" id="proLeads">0</div><div class="sc-l">Pro Plan Interest</div></div>
+          <div class="stat-card"><div class="sc-n" id="eliteLeads">0</div><div class="sc-l">Elite Plan Interest</div></div>
+        </div>
+        <div class="settings-card">
+          <h3><i class="fas fa-history"></i> Recent Enquiries</h3>
+          <div id="recentLeadsList"></div>
+        </div>
+      </div>
+
+      <!-- LEADS -->
+      <div id="panel-leads" class="panel">
+        <div class="panel-head"><div><h2>All Enquiries</h2><p>View, search and export all form submissions.</p></div></div>
+        <div class="leads-controls">
+          <input type="text" class="search-input" id="searchInput" placeholder="🔍  Search name, phone, email..." oninput="renderLeads()">
+          <div style="display:flex;gap:10px">
+            <button class="btn-export" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+            <button class="btn-clear" onclick="clearLeads()"><i class="fas fa-trash"></i> Clear All</button>
+          </div>
+        </div>
+        <div class="leads-table-wrap" id="leadsTableWrap"></div>
+      </div>
+
+      <!-- PHOTOS -->
+      <div id="panel-photos" class="panel">
+        <div class="panel-head"><div><h2>Change Photos</h2><p>Paste a new image URL to update any photo. Changes apply instantly on the site.</p></div></div>
+        <div class="settings-card" style="margin-bottom:20px">
+          <h3><i class="fas fa-home"></i> About Section Photos</h3>
+          <div class="photo-grid">
+            <div class="photo-item"><label>Main Photo (Large)</label><input type="url" id="pi_aboutImg1" placeholder="https://images.unsplash.com/..." oninput="previewPhoto(this,'pv_aboutImg1')"><img class="photo-preview" id="pv_aboutImg1"></div>
+            <div class="photo-item"><label>Small Photo 1</label><input type="url" id="pi_aboutImg2" placeholder="https://images.unsplash.com/..." oninput="previewPhoto(this,'pv_aboutImg2')"><img class="photo-preview" id="pv_aboutImg2"></div>
+            <div class="photo-item"><label>Small Photo 2</label><input type="url" id="pi_aboutImg3" placeholder="https://images.unsplash.com/..." oninput="previewPhoto(this,'pv_aboutImg3')"><img class="photo-preview" id="pv_aboutImg3"></div>
+          </div>
+        </div>
+        <div class="settings-card" style="margin-bottom:20px">
+          <h3><i class="fas fa-dumbbell"></i> Equipment Gallery Photos</h3>
+          <div class="photo-grid">
+            <div class="photo-item"><label>Dumbbell Rack</label><input type="url" id="pi_galleryImg1" placeholder="URL" oninput="previewPhoto(this,'pv_galleryImg1')"><img class="photo-preview" id="pv_galleryImg1"></div>
+            <div class="photo-item"><label>Barbell Station</label><input type="url" id="pi_galleryImg2" placeholder="URL" oninput="previewPhoto(this,'pv_galleryImg2')"><img class="photo-preview" id="pv_galleryImg2"></div>
+            <div class="photo-item"><label>Elite Strength Zone</label><input type="url" id="pi_galleryImg3" placeholder="URL" oninput="previewPhoto(this,'pv_galleryImg3')"><img class="photo-preview" id="pv_galleryImg3"></div>
+            <div class="photo-item"><label>Cardio Zone</label><input type="url" id="pi_galleryImg4" placeholder="URL" oninput="previewPhoto(this,'pv_galleryImg4')"><img class="photo-preview" id="pv_galleryImg4"></div>
+            <div class="photo-item"><label>Functional Zone</label><input type="url" id="pi_galleryImg5" placeholder="URL" oninput="previewPhoto(this,'pv_galleryImg5')"><img class="photo-preview" id="pv_galleryImg5"></div>
+            <div class="photo-item"><label>Kettlebell Area</label><input type="url" id="pi_galleryImg6" placeholder="URL" oninput="previewPhoto(this,'pv_galleryImg6')"><img class="photo-preview" id="pv_galleryImg6"></div>
+          </div>
+        </div>
+        <div class="settings-card">
+          <h3><i class="fas fa-user-tie"></i> Trainer Photos</h3>
+          <div class="photo-grid">
+            <div class="photo-item"><label>Trainer 1 Photo</label><input type="url" id="pi_trainer1Img" placeholder="URL" oninput="previewPhoto(this,'pv_trainer1Img')"><img class="photo-preview" id="pv_trainer1Img"></div>
+            <div class="photo-item"><label>Trainer 2 Photo</label><input type="url" id="pi_trainer2Img" placeholder="URL" oninput="previewPhoto(this,'pv_trainer2Img')"><img class="photo-preview" id="pv_trainer2Img"></div>
+            <div class="photo-item"><label>Trainer 3 Photo</label><input type="url" id="pi_trainer3Img" placeholder="URL" oninput="previewPhoto(this,'pv_trainer3Img')"><img class="photo-preview" id="pv_trainer3Img"></div>
+          </div>
+        </div>
+        <button class="btn-save" style="margin-top:20px" onclick="savePhotos()"><i class="fas fa-save"></i> Save All Photo Changes</button>
+        <div id="photoSaveMsg" class="save-msg"><i class="fas fa-check-circle"></i> Photos saved! Open site to see changes.</div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="panel-settings" class="panel">
+        <div class="panel-head"><div><h2>Settings</h2><p>Update contact info, social links, timings, trainer names and direction map.</p></div></div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3><i class="fas fa-phone"></i> Contact Information</h3>
+            <div class="s-field"><label>Phone Number</label><input type="tel" id="s_phone" placeholder="+91 99999 99999"></div>
+            <div class="s-field"><label>WhatsApp Number (no + or spaces)</label><input type="text" id="s_whatsapp" placeholder="919999999999"></div>
+            <div class="s-field"><label>Email Address</label><input type="email" id="s_email" placeholder="info@almightygym.in"></div>
+            <div class="s-field"><label>Gym Address</label><textarea id="s_address" placeholder="Full address..."></textarea></div>
+            <button class="btn-save" onclick="saveSettings()"><i class="fas fa-save"></i> Save Contact</button>
+            <div id="settingsSaveMsg" class="save-msg"><i class="fas fa-check-circle"></i> Saved successfully!</div>
+          </div>
+          <div class="settings-card">
+            <h3><i class="fas fa-clock"></i> Timings</h3>
+            <div class="s-field"><label>Weekday Timings</label><input type="text" id="s_hours_weekday" placeholder="Mon–Sat: 5AM – 11PM"></div>
+            <div class="s-field"><label>Sunday Timings</label><input type="text" id="s_hours_sunday" placeholder="Sun: 6AM – 8PM"></div>
+            <h3 style="margin-top:20px"><i class="fas fa-share-alt"></i> Social Media Links</h3>
+            <div class="s-field"><label><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram URL</label><input type="url" id="s_insta_url" placeholder="https://instagram.com/yourgym"></div>
+            <div class="s-field"><label><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook URL</label><input type="url" id="s_fb_url" placeholder="https://facebook.com/yourgym"></div>
+            <div class="s-field"><label><i class="fab fa-youtube" style="color:#ff0000"></i> YouTube URL</label><input type="url" id="s_yt_url" placeholder="https://youtube.com/@yourgym"></div>
+            <button class="btn-save" onclick="saveTimingsSocial()"><i class="fas fa-save"></i> Save Details</button>
+            <div id="timingsSaveMsg" class="save-msg"><i class="fas fa-check-circle"></i> Saved!</div>
+          </div>
+          <div class="settings-card">
+            <h3><i class="fas fa-map-marker-alt"></i> Google Maps Direction URL</h3>
+            <div class="s-field"><label>Direction Link (Google Maps URL)</label><textarea id="s_direction_url" placeholder="https://www.google.com/maps?daddr=..."></textarea></div>
+            <button class="btn-save" onclick="saveDirection()"><i class="fas fa-save"></i> Save Direction</button>
+            <div id="directionSaveMsg" class="save-msg"><i class="fas fa-check-circle"></i> Direction link saved!</div>
+          </div>
+          <div class="settings-card">
+            <h3><i class="fas fa-user-tie"></i> Trainer 1 Info</h3>
+            <div class="s-field"><label>Name</label><input type="text" id="s_trainer1Name" placeholder="Arjun Sharma"></div>
+            <div class="s-field"><label>Role</label><input type="text" id="s_trainer1Role" placeholder="Head Coach — Strength & Conditioning"></div>
+            <div class="s-field"><label>Bio</label><input type="text" id="s_trainer1Bio" placeholder="12+ years elite bodybuilding..."></div>
+            <h3 style="margin-top:16px"><i class="fas fa-user-tie"></i> Trainer 2 Info</h3>
+            <div class="s-field"><label>Name</label><input type="text" id="s_trainer2Name" placeholder="Priya Nair"></div>
+            <div class="s-field"><label>Role</label><input type="text" id="s_trainer2Role" placeholder="HIIT & Functional Coach"></div>
+            <div class="s-field"><label>Bio</label><input type="text" id="s_trainer2Bio" placeholder="Certified HIIT specialist..."></div>
+            <h3 style="margin-top:16px"><i class="fas fa-user-tie"></i> Trainer 3 Info</h3>
+            <div class="s-field"><label>Name</label><input type="text" id="s_trainer3Name" placeholder="Rohan Mehta"></div>
+            <div class="s-field"><label>Role</label><input type="text" id="s_trainer3Role" placeholder="Nutrition & Physique Coach"></div>
+            <div class="s-field"><label>Bio</label><input type="text" id="s_trainer3Bio" placeholder="IFBB-certified..."></div>
+            <button class="btn-save" onclick="saveTrainers()"><i class="fas fa-save"></i> Save Trainer Info</button>
+            <div id="trainerSaveMsg" class="save-msg"><i class="fas fa-check-circle"></i> Trainer info saved!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSWORD -->
+      <div id="panel-password" class="panel">
+        <div class="panel-head"><div><h2>Change Password</h2><p>Update your admin login password.</p></div></div>
+        <div class="pw-card">
+          <div class="s-field"><label>New Password</label><input type="password" id="newPass" placeholder="Enter new password"></div>
+          <div class="s-field"><label>Confirm Password</label><input type="password" id="confirmPass" placeholder="Confirm new password"></div>
+          <button class="btn-save" onclick="changePassword()"><i class="fas fa-key"></i> Change Password</button>
+          <div id="pwMsg" class="save-msg"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+const K_LEADS='almighty_leads', K_SET='gym_settings', K_PASS='admin_password';
+const DEF_PASS='almighty@123';
+
+const defaults={
+  phone:'+91 99999 99999', whatsapp:'919999999999',
+  email:'info@almightygym.in',
+  address:'opposite satya the hive, Dhankot, Gurugram, Haryana 122505',
+  direction_url:'https://www.google.com/maps?daddr=opposite+satya+the+hive,+Dhankot,+Gurugram,+Haryana+122505',
+  insta_url:'#', fb_url:'#', yt_url:'#',
+  hours_weekday:'Mon\u2013Sat: 5AM \u2013 11PM', hours_sunday:'Sun: 6AM \u2013 8PM',
+  aboutImg1:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=700&q=80',
+  aboutImg2:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=400&q=80',
+  aboutImg3:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=400&q=80',
+  galleryImg1:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80',
+  galleryImg2:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=500&q=80',
+  galleryImg3:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=600&q=80',
+  galleryImg4:'https://images.unsplash.com/photo-1576678927484-cc907957088c?w=500&q=80',
+  galleryImg5:'https://images.unsplash.com/photo-1574680178050-55c6a6a96e0a?w=500&q=80',
+  galleryImg6:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=500&q=80',
+  trainer1Img:'https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=400&q=80',
+  trainer1Name:'Arjun Sharma', trainer1Role:'Head Coach \u2014 Strength & Conditioning', trainer1Bio:'12+ years elite bodybuilding. Former state powerlifter.',
+  trainer2Img:'https://images.unsplash.com/photo-1548690312-e3b507d8c110?w=400&q=80',
+  trainer2Name:'Priya Nair', trainer2Role:'HIIT & Functional Coach', trainer2Bio:'Certified HIIT specialist. Fat loss expert.',
+  trainer3Img:'https://images.unsplash.com/photo-1534367507873-d2d7e24c797f?w=400&q=80',
+  trainer3Name:'Rohan Mehta', trainer3Role:'Nutrition & Physique Coach', trainer3Bio:'IFBB-certified. Body recomposition expert.'
+};
+
+function getSettings(){ return Object.assign({},defaults,JSON.parse(localStorage.getItem(K_SET)||'{}')) }
+function saveSettingsObj(obj){ const cur=getSettings(); localStorage.setItem(K_SET,JSON.stringify(Object.assign(cur,obj))); }
+function getLeads(){ return JSON.parse(localStorage.getItem(K_LEADS)||'[]') }
+function getPass(){ return localStorage.getItem(K_PASS)||DEF_PASS }
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  const err=document.getElementById('loginErr');
+  if((u==='admin'||u==='almighty')&&p===getPass()){
+    err.style.display='none';
+    document.getElementById('loginWrap').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    initAdmin();
+  } else {
+    err.style.display='flex';
+  }
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Enter')doLogin(); });
+
+function doLogout(){
+  document.getElementById('loginWrap').style.display='flex';
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('loginPass').value='';
+}
+
+function switchPanel(name,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  document.querySelectorAll('.sidebar-nav a').forEach(a=>a.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(name==='leads') renderLeads();
+}
+
+function initAdmin(){
+  updateStats();
+  loadSettingsFields();
+  loadPhotoFields();
+  renderRecentLeads();
+  window.addEventListener('storage',e=>{ if(e.key===K_LEADS){ updateStats(); renderLeads(); renderRecentLeads(); } });
+}
+
+function updateStats(){
+  const leads=getLeads();
+  document.getElementById('totalLeads').textContent=leads.length;
+  document.getElementById('leadsCount').textContent=leads.length;
+  const today=new Date().toLocaleDateString('en-IN');
+  document.getElementById('todayLeads').textContent=leads.filter(l=>l.timestamp&&l.timestamp.startsWith(today.split('/').reverse().join('/'))||l.timestamp&&l.timestamp.includes(new Date().getDate()+'/')).length;
+  document.getElementById('proLeads').textContent=leads.filter(l=>l.plan&&l.plan.toLowerCase().includes('pro')).length;
+  document.getElementById('eliteLeads').textContent=leads.filter(l=>l.plan&&l.plan.toLowerCase().includes('elite')).length;
+}
+
+function renderRecentLeads(){
+  const leads=getLeads().slice(-5).reverse();
+  const el=document.getElementById('recentLeadsList');
+  if(!leads.length){el.innerHTML='<p style="color:#5c5c5c;font-size:.86rem;padding:12px 0">No enquiries yet. They will appear here when visitors submit the form.</p>';return;}
+  el.innerHTML='<table style="width:100%"><tr><th>Name</th><th>Phone</th><th>Plan</th><th>Time</th></tr>'+leads.map(l=>`<tr><td style="color:#ececec">${l.name||'-'}</td><td>${l.phone||'-'}</td><td>${getPlanBadge(l.plan)}</td><td style="font-size:.78rem">${l.timestamp||''}</td></tr>`).join('')+'</table>';
+}
+
+function renderLeads(){
+  const q=(document.getElementById('searchInput')||{value:''}).value.toLowerCase();
+  let leads=getLeads().reverse();
+  if(q) leads=leads.filter(l=>(l.name+l.phone+l.email+l.plan+l.goal).toLowerCase().includes(q));
+  const wrap=document.getElementById('leadsTableWrap');
+  if(!leads.length){
+    wrap.innerHTML='<div class="no-leads"><i class="fas fa-inbox"></i><p>No enquiries found.</p></div>';
+    return;
+  }
+  wrap.innerHTML='<table><tr><th>#</th><th>Name</th><th>Phone</th><th>Email</th><th>Plan</th><th>Goal/Message</th><th>Time</th></tr>'+leads.map((l,i)=>`<tr><td>${i+1}</td><td style="color:#ececec;font-weight:600">${l.name||'-'}</td><td>${l.phone||'-'}</td><td>${l.email||'-'}</td><td>${getPlanBadge(l.plan)}</td><td style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l.goal||'-'}</td><td style="font-size:.78rem;white-space:nowrap">${l.timestamp||''}</td></tr>`).join('')+'</table>';
+}
+
+function getPlanBadge(plan){
+  if(!plan) return '<span class="badge badge-basic">-</span>';
+  if(plan.toLowerCase().includes('elite')) return '<span class="badge badge-elite">Elite</span>';
+  if(plan.toLowerCase().includes('pro')) return '<span class="badge badge-pro">Pro</span>';
+  if(plan.toLowerCase().includes('basic')) return '<span class="badge badge-basic">Basic</span>';
+  if(plan.toLowerCase().includes('trial')||plan.toLowerCase().includes('free')) return '<span class="badge badge-trial">Free Trial</span>';
+  return '<span class="badge badge-basic">'+plan+'</span>';
+}
+
+function exportCSV(){
+  const leads=getLeads();
+  if(!leads.length){ alert('No leads to export!'); return; }
+  const rows=[['#','Name','Phone','Email','Plan','Goal/Message','Timestamp']];
+  leads.forEach((l,i)=>rows.push([i+1,l.name||'',l.phone||'',l.email||'',l.plan||'',l.goal||'',l.timestamp||'']));
+  const csv=rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='almighty_leads_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+function clearLeads(){
+  if(!confirm('Delete ALL enquiries? This cannot be undone!')) return;
+  localStorage.removeItem(K_LEADS);
+  updateStats(); renderLeads(); renderRecentLeads();
+}
+
+function loadSettingsFields(){
+  const s=getSettings();
+  const fields=['phone','whatsapp','email','address','direction_url','insta_url','fb_url','yt_url','hours_weekday','hours_sunday','trainer1Name','trainer1Role','trainer1Bio','trainer2Name','trainer2Role','trainer2Bio','trainer3Name','trainer3Role','trainer3Bio'];
+  fields.forEach(f=>{ const el=document.getElementById('s_'+f); if(el&&s[f]) el.value=s[f]; });
+}
+
+function loadPhotoFields(){
+  const s=getSettings();
+  const photos=['aboutImg1','aboutImg2','aboutImg3','galleryImg1','galleryImg2','galleryImg3','galleryImg4','galleryImg5','galleryImg6','trainer1Img','trainer2Img','trainer3Img'];
+  photos.forEach(p=>{
+    const inp=document.getElementById('pi_'+p);
+    const prv=document.getElementById('pv_'+p);
+    if(inp&&s[p]) inp.value=s[p];
+    if(prv&&s[p]) prv.src=s[p];
+  });
+}
+
+function previewPhoto(inp,pvId){
+  const prv=document.getElementById(pvId);
+  if(prv&&inp.value) prv.src=inp.value;
+}
+
+function savePhotos(){
+  const photos=['aboutImg1','aboutImg2','aboutImg3','galleryImg1','galleryImg2','galleryImg3','galleryImg4','galleryImg5','galleryImg6','trainer1Img','trainer2Img','trainer3Img'];
+  const obj={};
+  photos.forEach(p=>{ const inp=document.getElementById('pi_'+p); if(inp&&inp.value.trim()) obj[p]=inp.value.trim(); });
+  saveSettingsObj(obj);
+  const msg=document.getElementById('photoSaveMsg');
+  msg.style.display='flex';
+  setTimeout(()=>msg.style.display='none',3000);
+}
+
+function saveSettings(){
+  saveSettingsObj({
+    phone:document.getElementById('s_phone').value.trim(),
+    whatsapp:document.getElementById('s_whatsapp').value.trim(),
+    email:document.getElementById('s_email').value.trim(),
+    address:document.getElementById('s_address').value.trim()
+  });
+  showMsg('settingsSaveMsg');
+}
+
+function saveTimingsSocial(){
+  saveSettingsObj({
+    hours_weekday:document.getElementById('s_hours_weekday').value.trim(),
+    hours_sunday:document.getElementById('s_hours_sunday').value.trim(),
+    insta_url:document.getElementById('s_insta_url').value.trim()||'#',
+    fb_url:document.getElementById('s_fb_url').value.trim()||'#',
+    yt_url:document.getElementById('s_yt_url').value.trim()||'#'
+  });
+  showMsg('timingsSaveMsg');
+}
+
+function saveDirection(){
+  saveSettingsObj({ direction_url:document.getElementById('s_direction_url').value.trim() });
+  showMsg('directionSaveMsg');
+}
+
+function saveTrainers(){
+  const obj={};
+  ['trainer1Name','trainer1Role','trainer1Bio','trainer2Name','trainer2Role','trainer2Bio','trainer3Name','trainer3Role','trainer3Bio'].forEach(f=>{
+    const el=document.getElementById('s_'+f);
+    if(el&&el.value.trim()) obj[f]=el.value.trim();
+  });
+  saveSettingsObj(obj);
+  showMsg('trainerSaveMsg');
+}
+
+function changePassword(){
+  const np=document.getElementById('newPass').value.trim();
+  const cp=document.getElementById('confirmPass').value.trim();
+  const msg=document.getElementById('pwMsg');
+  if(!np||np.length<4){ msg.style.display='flex'; msg.style.color='#e74c3c'; msg.textContent='Password too short (min 4 chars)!'; return; }
+  if(np!==cp){ msg.style.display='flex'; msg.style.color='#e74c3c'; msg.textContent='Passwords do not match!'; return; }
+  localStorage.setItem(K_PASS,np);
+  msg.style.display='flex'; msg.style.color='#22c55e';
+  msg.innerHTML='<i class="fas fa-check-circle"></i>&nbsp; Password changed successfully!';
+  document.getElementById('newPass').value='';
+  document.getElementById('confirmPass').value='';
+  setTimeout(()=>msg.style.display='none',3000);
+}
+
+function showMsg(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.style.display='flex';
+  setTimeout(()=>el.style.display='none',3000);
+}
+</script>
+</body>
+</html>
